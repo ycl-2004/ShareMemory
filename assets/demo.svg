@@ -2,20 +2,47 @@
   <title>ShareMemory demo: Claude records a decision on Monday, Codex picks it up on Tuesday</title>
   <style><![CDATA[
     text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; fill: #e6edf3; }
-    .ln { opacity: 0; animation: fadein .45s ease forwards; }
-    @keyframes fadein { to { opacity: 1; } }
-    .t0 { animation-delay: .5s; }  .t1 { animation-delay: 1.4s; }
-    .t2 { animation-delay: 2.6s; } .t3 { animation-delay: 3.4s; }
-    .t4 { animation-delay: 4.0s; } .t5 { animation-delay: 4.6s; }
-    .t6 { animation-delay: 6.2s; } .t7 { animation-delay: 7.2s; }
-    .t8 { animation-delay: 8.4s; } .t9 { animation-delay: 9.0s; }
+    .ln { opacity: 0; animation-duration: 20s; animation-timing-function: linear; animation-iteration-count: infinite; }
+    .t0 { animation-name: k0; } .t1 { animation-name: k1; } .t2 { animation-name: k2; }
+    .t3 { animation-name: k3; } .t4 { animation-name: k4; } .t5 { animation-name: k5; }
+    .t6 { animation-name: k6; } .t7 { animation-name: k7; } .t8 { animation-name: k8; }
+    .t9 { animation-name: k9; } .t10 { animation-name: k10; }
+    @keyframes k0  { 0%,2.5%{opacity:0;transform:translateY(5px)} 4.5%{opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k1  { 0%,6%  {opacity:0;transform:translateY(5px)} 8%  {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k2  { 0%,13% {opacity:0;transform:translateY(5px)} 15% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k3  { 0%,17% {opacity:0;transform:translateY(5px)} 19% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k4  { 0%,20% {opacity:0;transform:translateY(5px)} 22% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k5  { 0%,23% {opacity:0;transform:translateY(5px)} 25% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k6  { 0%,31% {opacity:0} 33% {opacity:1} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k7  { 0%,36% {opacity:0;transform:translateY(5px)} 38% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k8  { 0%,42% {opacity:0;transform:translateY(5px)} 44% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k9  { 0%,45% {opacity:0;transform:translateY(5px)} 47% {opacity:1;transform:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes k10 { 0%,48% {opacity:0} 50% {opacity:1} 94%{opacity:1} 98%,100%{opacity:0} }
     .dim { fill: #8b949e; } .grn { fill: #3fb950; } .blu { fill: #79c0ff; }
     .org { fill: #ffa657; } .tea { fill: #2dd4bf; } .pur { fill: #d2a8ff; }
-    .cur { animation: blink 1s step-end infinite 9.6s; opacity: 0; }
+    .cursor { animation: blink 1.1s step-end infinite; }
     @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    .check { animation: pop 20s linear infinite; transform-origin: center; }
+    .c3 { animation-name: pop3; } .c4 { animation-name: pop4; }
+    @keyframes pop3 { 0%,17%{opacity:0} 18%{opacity:1} 19%,21%{filter:url(#glow)} 22%{filter:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    @keyframes pop4 { 0%,20%{opacity:0} 21%{opacity:1} 22%,24%{filter:url(#glow)} 25%{filter:none} 94%{opacity:1} 98%,100%{opacity:0} }
+    .sep { stroke-dasharray: 4 6; animation: march 1.2s linear infinite; }
+    @keyframes march { to { stroke-dashoffset: -10; } }
   ]]></style>
 
-  <rect x="1" y="1" width="698" height="378" rx="12" fill="#0d1117" stroke="#30363d"/>
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d2a8ff" stop-opacity=".55"/>
+      <stop offset=".5" stop-color="#30363d"/>
+      <stop offset="1" stop-color="#2dd4bf" stop-opacity=".55"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="698" height="378" rx="12" fill="#0d1117" stroke="url(#frame)" stroke-width="1.5"/>
   <circle cx="24" cy="22" r="6" fill="#ff5f57"/><circle cx="44" cy="22" r="6" fill="#febc2e"/><circle cx="64" cy="22" r="6" fill="#28c840"/>
   <text x="350" y="27" text-anchor="middle" class="dim" font-size="11.5">two agents · one memory · zero re-explaining</text>
   <line x1="1" y1="40" x2="699" y2="40" stroke="#30363d"/>
@@ -23,14 +50,26 @@
   <text x="28" y="72" class="ln t0 dim"># Monday — Claude Code</text>
   <text x="28" y="96" class="ln t1"><tspan class="grn">❯</tspan> switch us from Vite to Next.js, we need SSR</text>
   <text x="28" y="120" class="ln t2"><tspan class="org">⏺ Claude</tspan>  Done. Recording the decision for whoever works here next…</text>
-  <text x="28" y="144" class="ln t3"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/DECISIONS.md</tspan>   <tspan class="pur">### [14:32] [Claude] Next.js over Vite (SSR)</tspan></text>
-  <text x="28" y="168" class="ln t4"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/SYNC_LOG.md</tspan>    <tspan class="pur">- [14:32] [Claude] [DECISIONS.md] Next.js for SSR</tspan></text>
+  <g class="check c3"><text x="28" y="144"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/DECISIONS.md</tspan>   <tspan class="pur">### [14:32] [Claude] Next.js over Vite (SSR)</tspan></text></g>
+  <g class="check c4"><text x="28" y="168"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/SYNC_LOG.md</tspan>    <tspan class="pur">- [14:32] [Claude] [DECISIONS.md] Next.js for SSR</tspan></text></g>
   <text x="28" y="192" class="ln t5"><tspan class="grn">  ✓</tspan> <tspan class="dim">check_memory.sh … memory OK · committed to git</tspan></text>
 
-  <text x="350" y="228" text-anchor="middle" class="ln t6 dim">────────  Tuesday — Codex · fresh session · zero context  ────────</text>
+  <g class="ln t6">
+    <line x1="60" y1="224" x2="240" y2="224" stroke="#30363d" class="sep"/>
+    <text x="350" y="228" text-anchor="middle" class="dim">Tuesday — Codex · fresh session · zero context</text>
+    <line x1="460" y1="224" x2="640" y2="224" stroke="#30363d" class="sep"/>
+  </g>
+
+  <!-- 记忆光球:从周一写入的记忆飞向周二的 Codex -->
+  <circle r="4.5" fill="#d2a8ff" filter="url(#glow)" opacity="0">
+    <animateMotion dur="20s" repeatCount="indefinite" calcMode="spline"
+      keyPoints="0;0;1;1" keyTimes="0;0.30;0.41;1" keySplines="0 0 1 1;0.4 0 0.2 1;0 0 1 1"
+      path="M 408 152 C 600 170, 600 268, 270 286"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.295;0.315;0.39;0.415;1" dur="20s" repeatCount="indefinite"/>
+  </circle>
 
   <text x="28" y="262" class="ln t7"><tspan class="grn">❯</tspan> add a pricing page</text>
   <text x="28" y="290" class="ln t8"><tspan class="tea">⏺ Codex</tspan>   Memory loaded. <tspan class="pur">Claude moved the build to Next.js yesterday (SSR)</tspan></text>
   <text x="28" y="312" class="ln t8">          — building the pricing page as an SSR route, not touching Vite.</text>
-  <text x="28" y="346" class="ln t9"><tspan class="grn">❯</tspan><tspan class="cur"> ▍</tspan><tspan class="dim">   no re-explaining. no conflicting choices. it just knows.</tspan></text>
+  <g class="ln t10"><text x="28" y="346"><tspan class="grn">❯</tspan><tspan class="cursor"> ▍</tspan><tspan class="dim">   no re-explaining. no conflicting choices. it just knows.</tspan></text></g>
 </svg>
