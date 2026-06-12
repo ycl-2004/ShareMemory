@@ -1,0 +1,36 @@
+<svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>ShareMemory demo: Claude records a decision on Monday, Codex picks it up on Tuesday</title>
+  <style><![CDATA[
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; fill: #e6edf3; }
+    .ln { opacity: 0; animation: fadein .45s ease forwards; }
+    @keyframes fadein { to { opacity: 1; } }
+    .t0 { animation-delay: .5s; }  .t1 { animation-delay: 1.4s; }
+    .t2 { animation-delay: 2.6s; } .t3 { animation-delay: 3.4s; }
+    .t4 { animation-delay: 4.0s; } .t5 { animation-delay: 4.6s; }
+    .t6 { animation-delay: 6.2s; } .t7 { animation-delay: 7.2s; }
+    .t8 { animation-delay: 8.4s; } .t9 { animation-delay: 9.0s; }
+    .dim { fill: #8b949e; } .grn { fill: #3fb950; } .blu { fill: #79c0ff; }
+    .org { fill: #ffa657; } .tea { fill: #2dd4bf; } .pur { fill: #d2a8ff; }
+    .cur { animation: blink 1s step-end infinite 9.6s; opacity: 0; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  ]]></style>
+
+  <rect x="1" y="1" width="698" height="378" rx="12" fill="#0d1117" stroke="#30363d"/>
+  <circle cx="24" cy="22" r="6" fill="#ff5f57"/><circle cx="44" cy="22" r="6" fill="#febc2e"/><circle cx="64" cy="22" r="6" fill="#28c840"/>
+  <text x="350" y="27" text-anchor="middle" class="dim" font-size="11.5">two agents · one memory · zero re-explaining</text>
+  <line x1="1" y1="40" x2="699" y2="40" stroke="#30363d"/>
+
+  <text x="28" y="72" class="ln t0 dim"># Monday — Claude Code</text>
+  <text x="28" y="96" class="ln t1"><tspan class="grn">❯</tspan> switch us from Vite to Next.js, we need SSR</text>
+  <text x="28" y="120" class="ln t2"><tspan class="org">⏺ Claude</tspan>  Done. Recording the decision for whoever works here next…</text>
+  <text x="28" y="144" class="ln t3"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/DECISIONS.md</tspan>   <tspan class="pur">### [14:32] [Claude] Next.js over Vite (SSR)</tspan></text>
+  <text x="28" y="168" class="ln t4"><tspan class="grn">  ✓</tspan> <tspan class="blu">AI_MEMORY/SYNC_LOG.md</tspan>    <tspan class="pur">- [14:32] [Claude] [DECISIONS.md] Next.js for SSR</tspan></text>
+  <text x="28" y="192" class="ln t5"><tspan class="grn">  ✓</tspan> <tspan class="dim">check_memory.sh … memory OK · committed to git</tspan></text>
+
+  <text x="350" y="228" text-anchor="middle" class="ln t6 dim">────────  Tuesday — Codex · fresh session · zero context  ────────</text>
+
+  <text x="28" y="262" class="ln t7"><tspan class="grn">❯</tspan> add a pricing page</text>
+  <text x="28" y="290" class="ln t8"><tspan class="tea">⏺ Codex</tspan>   Memory loaded. <tspan class="pur">Claude moved the build to Next.js yesterday (SSR)</tspan></text>
+  <text x="28" y="312" class="ln t8">          — building the pricing page as an SSR route, not touching Vite.</text>
+  <text x="28" y="346" class="ln t9"><tspan class="grn">❯</tspan><tspan class="cur"> ▍</tspan><tspan class="dim">   no re-explaining. no conflicting choices. it just knows.</tspan></text>
+</svg>

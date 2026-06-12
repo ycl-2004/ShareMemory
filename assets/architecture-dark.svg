@@ -1,0 +1,51 @@
+<svg viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg" role="img" font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <title>ShareMemory closed-loop architecture</title>
+  <desc>The skill folder is just the program, installed in two locations; each project has exactly one AI_MEMORY shared brain that both agents read and write, forming a closed loop.</desc>
+
+  <rect x="190" y="14" width="320" height="58" rx="8" fill="none" stroke="#3d444d" stroke-dasharray="5 4"/>
+  <text x="350" y="38" text-anchor="middle" fill="#f0f6fc" font-size="14" font-weight="600">ShareMemory skill folder</text>
+  <text x="350" y="58" text-anchor="middle" fill="#9198a1" font-size="11.5">program only — stores no memory</text>
+
+  <path d="M 270 72 L 165 116" stroke="#3d444d" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <path d="M 430 72 L 535 116" stroke="#3d444d" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <text x="172" y="98" text-anchor="middle" fill="#9198a1" font-size="10.5">~/.claude/skills/</text>
+  <text x="530" y="98" text-anchor="middle" fill="#9198a1" font-size="10.5">~/.agents/skills/</text>
+
+  <rect x="60" y="120" width="210" height="64" rx="8" fill="none" stroke="#3d444d"/>
+  <text x="165" y="146" text-anchor="middle" fill="#f0f6fc" font-size="14" font-weight="600">Claude Code</text>
+  <text x="165" y="166" text-anchor="middle" fill="#9198a1" font-size="11.5">boots from CLAUDE.md</text>
+
+  <rect x="430" y="120" width="210" height="64" rx="8" fill="none" stroke="#3d444d"/>
+  <text x="535" y="146" text-anchor="middle" fill="#f0f6fc" font-size="14" font-weight="600">Codex</text>
+  <text x="535" y="166" text-anchor="middle" fill="#9198a1" font-size="11.5">boots from AGENTS.md</text>
+
+  <rect x="40" y="212" width="620" height="200" rx="10" fill="none" stroke="#3d444d"/>
+  <text x="60" y="238" fill="#9198a1" font-size="11.5">your project folder (physically the same one)</text>
+
+  <rect x="235" y="258" width="230" height="120" rx="10" fill="none" stroke="#4493f8" stroke-width="2"/>
+  <text x="350" y="285" text-anchor="middle" fill="#f0f6fc" font-size="15" font-weight="700">AI_MEMORY/</text>
+  <text x="350" y="306" text-anchor="middle" fill="#9198a1" font-size="11.5">the project's single shared brain</text>
+  <text x="350" y="326" text-anchor="middle" fill="#9198a1" font-size="11.5">DECISIONS · TASKS · SYNC_LOG …</text>
+  <text x="350" y="352" text-anchor="middle" fill="#4493f8" font-size="11.5" font-weight="600">one copy — no merging, no syncing</text>
+
+  <path d="M 150 184 C 150 250, 200 290, 230 300" stroke="#4493f8" stroke-width="2" fill="none" marker-end="url(#arrB)"/>
+  <text x="128" y="252" text-anchor="middle" fill="#4493f8" font-size="11" font-weight="600">writes</text>
+
+  <path d="M 230 336 C 190 350, 130 320, 118 192" stroke="#9198a1" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+  <text x="158" y="356" text-anchor="middle" fill="#9198a1" font-size="11">reads on boot</text>
+
+  <path d="M 550 184 C 550 250, 500 290, 470 300" stroke="#4493f8" stroke-width="2" fill="none" marker-end="url(#arrB)"/>
+  <text x="574" y="252" text-anchor="middle" fill="#4493f8" font-size="11" font-weight="600">writes</text>
+
+  <path d="M 470 336 C 510 350, 570 320, 582 192" stroke="#9198a1" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+  <text x="544" y="356" text-anchor="middle" fill="#9198a1" font-size="11">reads on boot</text>
+
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1,1 L8,4.5 L1,8" fill="none" stroke="#9198a1" stroke-width="1.5"/>
+    </marker>
+    <marker id="arrB" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1,1 L8,4.5 L1,8" fill="none" stroke="#4493f8" stroke-width="1.5"/>
+    </marker>
+  </defs>
+</svg>
