@@ -1,2 +1,18 @@
 .DS_Store
-docs/changes/
+docs/
+
+# Project-local ShareMemory runtime state. The reusable templates live under
+# templates/ and should be committed; initialized per-repo memory should not.
+/AI_MEMORY/
+/AGENTS.md
+/CLAUDE.md
+/MEMORY_PROTOCOL.md
+/scripts/check_memory.sh
+
+# Local validation scripts. Keep GitHub package lean; CI carries its own smoke
+# test inline.
+/scripts/test_memory_templates.sh
+
+# Backups created by init/repair/migrate marker-block rewrites.
+*.bak
+*.bak.*

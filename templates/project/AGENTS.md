@@ -1,18 +1,32 @@
-# Codex — ShareMemory Boot
+# AGENTS.md
 
-AGENT_NAME: `Codex`
+<!-- SHAREMEMORY:START -->
+## ShareMemory Boot (shared, agent-neutral)
 
-You MUST read `MEMORY_PROTOCOL.md` and follow it before doing anything else in this project.
+This project uses `AI_MEMORY/` as the shared memory source for ALL coding agents.
+You MUST read `MEMORY_PROTOCOL.md` and follow it before doing anything else.
 
-Quick reference:
+Before work — tiered startup, budget ~700 tokens:
 
-1. **Mental model**: `SYNC_LOG.md` + archive are daily handoff history; `PROJECT.md` / `DECISIONS.md` / `TASKS.md` / `LEARNINGS.md` are current views.
-2. **Startup (tiered)**: always read `AI_MEMORY/CONFIG.md`, the Long-Term Memory section of `PROJECT.md`, and the latest 1-2 daily blocks of `SYNC_LOG.md` (check for Claude's changes). Read `DECISIONS.md` / `TASKS.md` / `LEARNINGS.md` on demand, before related work.
-3. **Missing memory**: if `AI_MEMORY/` doesn't exist, run First-Time Init per protocol §3 — ask the user for the memory language, then invoke the `share-memory` skill (installed at `~/.agents/skills/share-memory/`) or copy its `templates/memory/` into `AI_MEMORY/`.
-4. **Auto-write**: decisions and dependency changes → memory immediately; task completion → today's `SYNC_LOG.md` block. Task progress / learnings → only when the user says "update memory".
-5. **Every write**: acquire `AI_MEMORY/.write.lock` (covers ALL writes incl. archiving; if held, report the lock's age to the user — ~60min+ with no agent running = stale candidate), sign entries `[YYYY-MM-DD HH:MM] [Codex]` (real system time), update today's `SYNC_LOG.md` block ("today" = system date at write time, even past midnight), then run `scripts/check_memory.sh`.
-5b. **Corrections**: closed date blocks are immutable — fix past mistakes via a `[correction]` bullet in TODAY's block pointing at the wrong entry (+ `supersedes [date]` entry in current-view files). Never edit history or silently work around a wrong memory entry.
-6. **Write threshold**: write only facts that change what a future agent should do; no raw reasoning, guesses, verbose logs, or secrets.
-7. **Style**: entries ≤3 lines, telegraphic. Dedup first; replacements marked `supersedes [date]`. NEVER write secrets into memory.
-8. **Conflicts**: user instruction wins, but point out conflicts with memory and confirm; then update memory.
-9. **Size**: max 5 entries per file; `SYNC_LOG.md` keeps latest 7 daily blocks. Overflow → Long-Term Memory in `PROJECT.md` (re-read before rewriting) or `archive/`. Commit `AI_MEMORY/` to git after write sessions if `Git: enabled` in `CONFIG.md`.
+1. Read `AI_MEMORY/CONFIG.md` (memory language, git setting).
+2. Read the **Long-Term Memory** section of `AI_MEMORY/PROJECT.md` (full file on first session).
+3. Read the latest 1-2 daily blocks of `AI_MEMORY/SYNC_LOG.md` — note what the OTHER agent changed.
+
+Read `DECISIONS.md` / `TASKS.md` / `LEARNINGS.md` on demand, before related work — not at startup.
+If `AI_MEMORY/` is missing, run First-Time Init per protocol §3 (via the `share-memory` skill).
+
+During work — protocol quick reference:
+
+- **Auto-write**: decisions & dependency changes → `DECISIONS.md`; task completion → today's `SYNC_LOG.md` block. Task progress / learnings → only when the user says "update memory".
+- **Every write**: acquire `AI_MEMORY/.write.lock` first (covers ALL writes; if held, report the lock's age — ~60min+ with no agent running = stale candidate). Sign `[YYYY-MM-DD HH:MM] [AGENT_NAME]` with real system time. Update today's `SYNC_LOG.md` block ("today" = system date at write time, even past midnight). Then run `scripts/check_memory.sh`.
+- **Corrections**: closed daily blocks are immutable — fix past mistakes via a `[correction]` bullet in TODAY's block (+ `supersedes [date]` entry in current-view files). Never rewrite history or silently work around wrong memory.
+- **Style**: entries ≤3 lines, telegraphic; write only facts that change what a future agent should do. NEVER write secrets, tokens, credentials, or private URLs.
+- **Conflicts**: user instruction wins, but point out conflicts with memory and confirm; then update memory.
+- **Size**: max 5 entries per file; `SYNC_LOG.md` keeps 7 daily blocks, ≤15 bullets each. Commit `AI_MEMORY/` after write sessions if `Git: enabled` in `CONFIG.md`.
+
+Agent-specific notes:
+
+- If you are **Codex**: AGENT_NAME is `Codex`. You may invoke the skill explicitly with `$share-memory` when needed.
+- If you are **Claude Code**: AGENT_NAME is `Claude`; see `CLAUDE.md` for Claude-specific behavior.
+- Any other agent: use your product name as AGENT_NAME and follow this file.
+<!-- SHAREMEMORY:END -->

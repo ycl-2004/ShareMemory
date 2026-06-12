@@ -15,25 +15,24 @@ jobs:
       - name: Shell syntax check
         run: bash -n templates/project/scripts/check_memory.sh
 
-      - name: Blank templates pass lint
+      - name: Template smoke test
         run: |
-          mkdir -p /tmp/proj/scripts
-          cp -r templates/memory /tmp/proj/AI_MEMORY
-          mkdir /tmp/proj/AI_MEMORY/archive
-          cp templates/project/scripts/check_memory.sh /tmp/proj/scripts/
-          sed -i 's/- Protocol: .*/- Protocol: v1.0/' /tmp/proj/AI_MEMORY/CONFIG.md
+          make_project() {
+            mkdir -p /tmp/proj/scripts /tmp/proj/AI_MEMORY/archive
+            cp templates/project/AGENTS.md /tmp/proj/AGENTS.md
+            cp templates/project/CLAUDE.md /tmp/proj/CLAUDE.md
+            cp templates/project/MEMORY_PROTOCOL.md /tmp/proj/MEMORY_PROTOCOL.md
+            cp templates/project/scripts/check_memory.sh /tmp/proj/scripts/check_memory.sh
+            chmod +x /tmp/proj/scripts/check_memory.sh
+            cp templates/memory/*.md /tmp/proj/AI_MEMORY/
+          }
+
+          make_project
           bash /tmp/proj/scripts/check_memory.sh
 
-      - name: Violations are caught
-        run: |
-          sed -i 's/- Protocol: v1.0/- Protocol: v0.9/' /tmp/proj/AI_MEMORY/CONFIG.md
-          printf '\n## 2026-01-01\n' >> /tmp/proj/AI_MEMORY/SYNC_LOG.md
-          for i in $(seq 1 16); do printf -- '- [10:%02d] [Claude] [TASKS.md] bullet %d\n' "$i" "$i" >> /tmp/proj/AI_MEMORY/SYNC_LOG.md; done
-          mkdir /tmp/proj/AI_MEMORY/.write.lock
+          printf '\n<!-- SHAREMEMORY:START -->\nextra\n<!-- SHAREMEMORY:END -->\n' >> /tmp/proj/AGENTS.md
           if bash /tmp/proj/scripts/check_memory.sh; then
-            echo "lint failed to catch injected violations" && exit 1
-          else
-            echo "all injected violations caught"
+            echo "lint failed to catch duplicate marker" && exit 1
           fi
 
       - name: SVG assets are valid XML

@@ -5,7 +5,7 @@
 **Project-scoped shared memory for AI coding agents,
 packaged as a single skill that works in both Claude Code and Codex.**
 
-[![CI](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-blue?logo=claude&logoColor=white)](https://code.claude.com/docs/en/skills) [![Codex](https://img.shields.io/badge/Codex-supported-10a37f?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills) [![Protocol](https://img.shields.io/badge/protocol-v1.0-informational)](templates/project/MEMORY_PROTOCOL.md) [![Dependencies](https://img.shields.io/badge/dependencies-none-success)](#requirements) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
+[![CI](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-blue?logo=claude&logoColor=white)](https://code.claude.com/docs/en/skills) [![Codex](https://img.shields.io/badge/Codex-supported-10a37f?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills) [![Protocol](https://img.shields.io/badge/protocol-v1.1-informational)](templates/project/MEMORY_PROTOCOL.md) [![Dependencies](https://img.shields.io/badge/dependencies-none-success)](#requirements) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
 
 *Your agents forget everything between sessions — and they've never met each other. Fix both with one `git clone`.*
 
@@ -115,17 +115,19 @@ Remember to `git pull` both copies when updating. For a single Claude Code proje
 | `update memory` | Record task progress for the next agent. |
 | `memory status` | See current project state and what the other agent changed recently. |
 | `consolidate memory` | Compress stale or duplicated memory while keeping startup cost stable. |
+| `repair memory` | Fix drift: missing `@AGENTS.md` import, duplicate/broken marker blocks, missing files. |
 
 These phrases trigger the skill implicitly on both platforms. In Codex you can also invoke it explicitly by typing `$share-memory` (or via `/skills`); Claude Code picks it up automatically from the skill description.
 
-During init, the skill asks two questions: memory language (中文 / English / bilingual) and whether to enable the git recovery layer. Existing `CLAUDE.md` / `AGENTS.md` files are appended to, never overwritten.
+During init, the skill asks two questions: memory language (中文 / English / bilingual) and whether to enable the git recovery layer. Existing `CLAUDE.md` / `AGENTS.md` files are never overwritten — ShareMemory content lives in a bounded `<!-- SHAREMEMORY:START/END -->` marker block that init inserts or replaces (with a backup), so repeated runs stay clean. `CLAUDE.md` follows [Anthropic's recommended pattern](https://code.claude.com/docs/en/memory): one `@AGENTS.md` import plus Claude-specific notes, so the shared rules exist in exactly one place.
 
 ## What `init` adds to your project
 
 | File | Purpose | Written |
 |---|---|---|
 | `MEMORY_PROTOCOL.md` | The shared rule set both agents follow | once |
-| `CLAUDE.md` / `AGENTS.md` | Per-agent boot files (auto-loaded), pointing at the protocol | once |
+| `AGENTS.md` | Shared agent-neutral boot rules (Codex reads natively; Claude imports it) | managed marker block |
+| `CLAUDE.md` | `@AGENTS.md` import + Claude-only notes (incl. auto-memory policy) | managed marker block |
 | `scripts/check_memory.sh` | Post-write lint + secrets scan | once |
 | `AI_MEMORY/CONFIG.md` | Language, git choice, protocol version | on init |
 | `AI_MEMORY/PROJECT.md` | Overview, architecture, **Long-Term Memory** (distilled current state) | auto, on structural change |
@@ -144,6 +146,7 @@ Durable entries are signed `[YYYY-MM-DD HH:MM] [Claude|Codex]` with real system 
 - **Secrets never enter memory** — API keys, credentials, tokens, and private URLs are forbidden and linted for.
 - **Do not run both agents simultaneously** on one project. A lightweight lock prevents accidental overlap, and the optional git layer recovers anything that still gets overwritten.
 - **Corrections, not edits** — closed daily blocks are immutable; past mistakes are fixed by a `[correction]` bullet in today's block (plus a `supersedes` entry in current views), never by rewriting history.
+- **Agent-private memory stays private** — Claude Code's machine-local auto memory is fine for its own learning, but cross-agent decisions must land in `AI_MEMORY/`; the Claude boot notes enforce this.
 - **Publishing a public repository?** `AI_MEMORY/` contains your project's internal decisions and plans. Secrets are linted out, but consider adding `AI_MEMORY/` to `.gitignore` if that context should stay private.
 
 ## Requirements
@@ -159,7 +162,7 @@ The skill never auto-installs software. During init it *asks* whether to enable 
 
 ## 中文快速开始
 
-本仓库本身就是一个 skill:克隆到 `~/.claude/skills/share-memory`(Claude Code),再用软链接 `ln -s ~/.claude/skills/share-memory ~/.agents/skills/share-memory` 接入 Codex(同一份代码,永不漂移)。之后在任何项目里说「init memory」,skill 会把协议、启动文件、校验脚本和空白记忆结构铺设进该项目(已有的 CLAUDE.md / AGENTS.md 只追加不覆盖),并询问记忆语言和是否启用 git 找回层。架构决策和依赖变更自动写入;任务进度说「update memory」;「consolidate memory」做定期压缩。`SYNC_LOG.md` 每天最多一个交接块,agent 启动时读取最近 1-2 天来看到对方改了什么。设计细节见[《项目详解》](项目详解.md)。
+本仓库本身就是一个 skill:克隆到 `~/.claude/skills/share-memory`(Claude Code),再用软链接 `ln -s ~/.claude/skills/share-memory ~/.agents/skills/share-memory` 接入 Codex(同一份代码,永不漂移)。之后在任何项目里说「init memory」,skill 会把协议、启动文件、校验脚本和空白记忆结构铺设进该项目;已有的 `CLAUDE.md` / `AGENTS.md` 不会被整文件覆盖,只会在 `<!-- SHAREMEMORY:START/END -->` marker block 内插入或替换 ShareMemory 内容,并先生成时间戳备份。架构决策和依赖变更自动写入;任务进度说「update memory」;「consolidate memory」做定期压缩。`SYNC_LOG.md` 每天最多一个交接块,agent 启动时读取最近 1-2 天来看到对方改了什么。设计细节见[《项目详解》](项目详解.md)。
 
 ## FAQ
 

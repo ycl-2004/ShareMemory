@@ -1,7 +1,9 @@
-# ShareMemory Protocol v1.0
+# ShareMemory Protocol v1.1
 
 Project-scoped shared memory for AI agents working in this repository. `AI_MEMORY/` is the source of truth.
-AGENT_NAME: Claude Code → `Claude` (boot: `CLAUDE.md`) · Codex → `Codex` (boot: `AGENTS.md`).
+
+Boot layers: `AGENTS.md` holds the shared, agent-neutral boot rules (all agents read it — Codex natively, Claude Code via the `@AGENTS.md` import in `CLAUDE.md`). `CLAUDE.md` adds Claude-only notes. Boot content lives inside `<!-- SHAREMEMORY:START/END -->` marker blocks managed by the share-memory skill — exactly one block per file.
+AGENT_NAME: Claude Code → `Claude` · Codex → `Codex` · others → product name.
 
 ## 1. Memory Model
 
@@ -13,6 +15,8 @@ ShareMemory is not a chat transcript or a database. It is a project handoff laye
 Goal: a new agent should understand the project state in under 2 minutes, avoid repeated work, preserve key decisions, and keep startup memory reads small.
 
 ## 2. Startup — tiered, to keep token cost low
+
+Startup budget: target **under ~700 tokens**. Do not expand old logs or full detail files during boot; use `memory status` for deeper inspection.
 
 ALWAYS read before any task (cheap core set):
 
@@ -33,8 +37,9 @@ If `AI_MEMORY/` is missing or empty → First-Time Init (§3). After loading, st
 1. Ask the user the memory language: 中文 / English / bilingual.
 2. Ask the user whether to enable git as the memory recovery layer (explain what it does first; check `git --version`; never `git init` without explicit permission).
 3. Create `AI_MEMORY/` + `archive/` from the share-memory skill’s `templates/memory/` (both agents use the same skill).
-4. Record language + git choice + date in `CONFIG.md`; fill `PROJECT.md` (ask the user if unclear).
-5. Create/update today's `SYNC_LOG.md` block with the init summary.
+4. Set up boot files via marker blocks (never plain append): if a file has no `SHAREMEMORY` block → insert it; if it has one → replace it; if the file doesn't exist → create from template. Back up existing files before modifying as `<file>.bak.YYYYMMDD-HHMMSS`. Ensure `CLAUDE.md` contains `@AGENTS.md`.
+5. Record language + git choice + date in `CONFIG.md`; fill `PROJECT.md` (ask the user if unclear).
+6. Create/update today's `SYNC_LOG.md` block with the init summary.
 
 ## 4. Write Lock
 
