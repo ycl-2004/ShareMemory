@@ -5,6 +5,15 @@
 docs/
 /LUBAN_AUDIT_REPORT.md
 
+# Demo render intermediates. Keep final showcase assets such as assets/demo.gif
+# and assets/social-preview.png tracked; only generated scratch files go here.
+assets/.demo.gif-*
+assets/*-frames/
+assets/frames/
+assets/render-frames/
+assets/*.tmp.gif
+assets/*.tmp.mp4
+
 # Project-local ShareMemory runtime state. The reusable templates live under
 # templates/ and should be committed; initialized per-repo memory should not.
 /AI_MEMORY/
