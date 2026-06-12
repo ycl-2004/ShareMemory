@@ -1,0 +1,24 @@
+{
+  "name": "share-memory",
+  "owner": {
+    "name": "ycl-2004",
+    "url": "https://github.com/ycl-2004"
+  },
+  "metadata": {
+    "description": "Marketplace hosting the ShareMemory cross-agent shared-memory protocol plugin."
+  },
+  "plugins": [
+    {
+      "name": "share-memory",
+      "description": "ShareMemory — project-scoped shared memory protocol for Claude Code + Codex. One AI_MEMORY/ per project, daily handoff blocks, write lock, lint, repair, and migrate. Zero dependencies, plain Markdown + bash.",
+      "version": "1.1.0",
+      "author": {
+        "name": "ycl-2004",
+        "url": "https://github.com/ycl-2004"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/ycl-2004/ShareMemory"
+    }
+  ]
+}

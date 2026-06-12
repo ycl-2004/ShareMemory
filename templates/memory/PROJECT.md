@@ -12,4 +12,7 @@
 ## Long-Term Memory
 (Distilled, always-current project state. Max ~30 lines — rewrite, don't append.
 This is a current view, not the event history. Promote only durable facts from
-DECISIONS/TASKS/LEARNINGS overflow or confirmed project changes.)
+DECISIONS/TASKS/LEARNINGS overflow or confirmed project changes, including
+skill-rule/protocol/schema changes. Refresh after milestones/releases,
+cross-session durable state changes, consolidation/archive, or whenever startup
+would mislead a fresh agent without the new summary.)

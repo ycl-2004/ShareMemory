@@ -15,25 +15,68 @@ jobs:
       - name: Shell syntax check
         run: bash -n templates/project/scripts/check_memory.sh
 
-      - name: Template smoke test
+      - name: Template matrix
         run: |
+          set -euo pipefail
+
           make_project() {
-            mkdir -p /tmp/proj/scripts /tmp/proj/AI_MEMORY/archive
-            cp templates/project/AGENTS.md /tmp/proj/AGENTS.md
-            cp templates/project/CLAUDE.md /tmp/proj/CLAUDE.md
-            cp templates/project/MEMORY_PROTOCOL.md /tmp/proj/MEMORY_PROTOCOL.md
-            cp templates/project/scripts/check_memory.sh /tmp/proj/scripts/check_memory.sh
-            chmod +x /tmp/proj/scripts/check_memory.sh
-            cp templates/memory/*.md /tmp/proj/AI_MEMORY/
+            local dir="$1"
+            mkdir -p "$dir/scripts" "$dir/AI_MEMORY/archive"
+            cp templates/project/AGENTS.md "$dir/AGENTS.md"
+            cp templates/project/CLAUDE.md "$dir/CLAUDE.md"
+            cp templates/project/MEMORY_PROTOCOL.md "$dir/MEMORY_PROTOCOL.md"
+            cp templates/project/scripts/check_memory.sh "$dir/scripts/check_memory.sh"
+            chmod +x "$dir/scripts/check_memory.sh"
+            cp templates/memory/*.md "$dir/AI_MEMORY/"
           }
 
-          make_project
-          bash /tmp/proj/scripts/check_memory.sh
+          expect_pass() {
+            local name="$1"
+            local dir="/tmp/$name"
+            rm -rf "$dir"
+            make_project "$dir"
+            (cd "$dir" && bash scripts/check_memory.sh)
+            echo "pass: $name"
+          }
 
-          printf '\n<!-- SHAREMEMORY:START -->\nextra\n<!-- SHAREMEMORY:END -->\n' >> /tmp/proj/AGENTS.md
-          if bash /tmp/proj/scripts/check_memory.sh; then
-            echo "lint failed to catch duplicate marker" && exit 1
-          fi
+          expect_fail() {
+            local name="$1"
+            local mutate="$2"
+            local expected="$3"
+            local dir="/tmp/$name"
+            rm -rf "$dir"
+            make_project "$dir"
+            (cd "$dir" && eval "$mutate")
+            if (cd "$dir" && bash scripts/check_memory.sh >out.txt 2>&1); then
+              cat "$dir/out.txt"
+              echo "$name should fail"
+              exit 1
+            fi
+            grep -q "$expected" "$dir/out.txt" || {
+              cat "$dir/out.txt"
+              echo "$name failed for the wrong reason"
+              exit 1
+            }
+            echo "pass: $name"
+          }
+
+          expect_pass "sharememory-full-template"
+          expect_fail "sharememory-missing-agents" "rm AGENTS.md" "AGENTS.md missing"
+          expect_fail "sharememory-missing-claude" "rm CLAUDE.md" "CLAUDE.md missing"
+          expect_fail "sharememory-duplicate-marker" "printf '\n<!-- SHAREMEMORY:START -->\nextra\n<!-- SHAREMEMORY:END -->\n' >> AGENTS.md" "AGENTS.md: 2 SHAREMEMORY blocks"
+          expect_fail "sharememory-unbalanced-marker" "perl -0pi -e 's/<!-- SHAREMEMORY:END -->//;' AGENTS.md" "unbalanced SHAREMEMORY markers"
+          expect_fail "sharememory-missing-claude-import" "perl -0pi -e 's/\n\@AGENTS\.md\n/\n/' CLAUDE.md" "missing the @AGENTS.md import"
+          expect_fail "sharememory-secret-scan" "printf '\n### [2026-06-12 12:00] [Codex] Bad secret\napi_key: sk-1234567890abcdef123456\n' >> AI_MEMORY/LEARNINGS.md" "possible secrets"
+          expect_fail "sharememory-protocol-mismatch" "perl -0pi -e 's/Protocol: v1\.1/Protocol: v0.9/' AI_MEMORY/CONFIG.md" "protocol v0.9"
+
+          grep -q 'If you are \*\*Codex\*\*: AGENT_NAME is `Codex`' templates/project/AGENTS.md
+          grep -q '^@AGENTS\.md$' templates/project/CLAUDE.md
+          test -x templates/project/scripts/check_memory.sh
+
+      - name: Demo replay
+        run: |
+          bash -n assets/demo.sh
+          bash assets/demo.sh
 
       - name: SVG assets are valid XML
         run: |

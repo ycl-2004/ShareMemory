@@ -1,5 +1,9 @@
 .DS_Store
+
+# Local/internal author notes and validation reports. Public-facing docs live in
+# README.md, README.zh.md, PROJECT_DETAILS.md, and tracked examples/templates.
 docs/
+/LUBAN_AUDIT_REPORT.md
 
 # Project-local ShareMemory runtime state. The reusable templates live under
 # templates/ and should be committed; initialized per-repo memory should not.

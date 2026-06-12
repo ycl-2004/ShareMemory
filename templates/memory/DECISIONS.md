@@ -1,7 +1,7 @@
 # Decisions
 
-Max 5 entries, each ≤3 lines. Auto-written on every architectural/technical decision and dependency change.
-Overflow → Long-Term Memory in PROJECT.md or archive/ (protocol §8). Replacing an old decision → mark `supersedes [date]`.
+Max 5 entries, each ≤3 lines. Auto-written on every architectural/technical decision, dependency change, skill-rule/protocol/schema change, boot-template/lint-gate change, or install/publishing contract change.
+Overflow → Long-Term Memory in PROJECT.md or archive/ (protocol §9). Replacing an old decision → mark `supersedes [date]`.
 
 <!-- Format:
   ### [YYYY-MM-DD HH:MM] [Claude|Codex] Title

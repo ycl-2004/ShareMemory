@@ -2,12 +2,18 @@
 
 # ShareMemory
 
+[English](README.md) | [中文](README.zh.md)
+
+> *Your agents forget everything between sessions - and they have never met each other.*
+
 **Project-scoped shared memory for AI coding agents,
 packaged as a single skill that works in both Claude Code and Codex.**
 
-[![CI](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-blue?logo=claude&logoColor=white)](https://code.claude.com/docs/en/skills) [![Codex](https://img.shields.io/badge/Codex-supported-10a37f?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills) [![Protocol](https://img.shields.io/badge/protocol-v1.1-informational)](templates/project/MEMORY_PROTOCOL.md) [![Dependencies](https://img.shields.io/badge/dependencies-none-success)](#requirements) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
+[![CI](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml/badge.svg)](https://github.com/ycl-2004/ShareMemory/actions/workflows/ci.yml) [![skills.sh](https://skills.sh/b/ycl-2004/ShareMemory)](https://skills.sh/ycl-2004/ShareMemory/share-memory) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-blue?logo=claude&logoColor=white)](https://code.claude.com/docs/en/skills) [![Codex](https://img.shields.io/badge/Codex-supported-10a37f?logo=openai&logoColor=white)](https://developers.openai.com/codex/skills) [![Protocol](https://img.shields.io/badge/protocol-v1.1-informational)](templates/project/MEMORY_PROTOCOL.md) [![Dependencies](https://img.shields.io/badge/dependencies-none-success)](#requirements) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#contributing)
 
-*Your agents forget everything between sessions — and they've never met each other. Fix both with one `git clone`.*
+**One `AI_MEMORY/` folder turns isolated Claude Code and Codex sessions into a shared, linted project handoff loop.**
+
+[See it run](#see-it-in-action) · [Install](#30-second-quick-start) · [Use it daily](#daily-usage) · [Design details](PROJECT_DETAILS.md) · [Verify it](#verification) · [Safety](#conflict--safety-rules)
 
 </div>
 
@@ -18,23 +24,41 @@ Claude Code and Codex do not share context. When both agents work in the same re
 ## See It in Action
 
 <div align="center">
-<img src="assets/demo.svg" width="700" alt="Animated demo: on Monday Claude records the decision to switch to Next.js in AI_MEMORY; on Tuesday Codex boots with zero context, reads the memory, and continues on Next.js without being told.">
+<img src="assets/demo.gif" width="760" alt="Terminal replay: ShareMemory initializes a demo project, writes Claude's handoff to AI_MEMORY, runs the memory lint, and shows Codex reading the latest handoff.">
 </div>
+
+This GIF is generated from a real local replay: [`assets/demo.sh`](assets/demo.sh) creates a throwaway project from the templates, writes a Claude handoff, then runs `scripts/check_memory.sh` before showing what Codex reads on startup. Re-record with [`assets/demo.tape`](assets/demo.tape) if you use VHS, or regenerate the checked-in GIF on macOS with `swift assets/render-demo-gif.swift`.
 
 ## 30-Second Quick Start
 
-```bash
-# Claude Code
-git clone https://github.com/ycl-2004/ShareMemory ~/.claude/skills/share-memory
+Recommended for this project: install one repo-local copy for Codex, then expose the same copy to Claude Code.
 
-# Codex
-mkdir -p ~/.agents/skills
-ln -s ~/.claude/skills/share-memory ~/.agents/skills/share-memory
+```bash
+# Run inside the repo where you want both agents to use ShareMemory
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent codex --copy --yes
+mkdir -p .claude/skills
+ln -s ../../.agents/skills/share-memory .claude/skills/share-memory
 ```
 
-Then open any project in Claude Code or Codex and say **`init memory`**. Codex discovers the skill from `~/.agents/skills`; the symlink keeps both agents on the same ShareMemory version. Open the same folder with the other agent and it will read the same `AI_MEMORY/` state instead of starting from zero.
+Codex reads repo skills from `.agents/skills/`. Claude Code reads project skills from `.claude/skills/`. The symlink keeps both agents on the same ShareMemory code in that repo.
 
-MIT licensed. No runtime dependencies. One real install URL. One shared memory per project.
+Or install manually without Node.js:
+
+```bash
+mkdir -p .agents/skills .claude/skills
+git clone https://github.com/ycl-2004/ShareMemory .agents/skills/share-memory
+ln -s ../../.agents/skills/share-memory .claude/skills/share-memory
+```
+
+Then open that repo in Claude Code or Codex and say **`init memory`**. Open the same folder with the other agent and it will read the same `AI_MEMORY/` state instead of starting from zero.
+
+**Verify it worked** — after `init memory`, paste this into either agent:
+
+> memory status
+
+Expected: a status report showing protocol version, language, git setting, and the init log entry.
+
+MIT licensed. No runtime dependencies. One skills.sh-backed project install command, one git fallback. One shared memory per repo.
 
 <details>
 <summary><b>📄 What actually got written that Monday (click to expand)</b></summary>
@@ -69,7 +93,7 @@ Tuesday's boot sequence reads exactly these lines — that's the entire trick. N
 |---|---|---|
 | 🧠 | **One shared brain per project** | Both agents read/write the same `AI_MEMORY/` files — communication is guaranteed by "must read on boot, must update the daily handoff" |
 | 🔁 | **Daily handoff loop** | Each day has one `SYNC_LOG.md` block; every boot reads the latest 1-2 blocks to see what changed |
-| ✍️ | **Auto + manual writes** | Decisions and dependency changes are recorded automatically; task progress on `"update memory"` |
+| ✍️ | **Auto + manual writes** | Decisions, rule changes, handoff-critical task state, and confirmed reusable lessons are automatic; routine cleanup uses `"update memory"` |
 | 🪶 | **Token-frugal by design** | Tiered startup (~a few hundred tokens), telegraphic entries (≤3 lines), 5-entry caps, progressive summarization into Long-Term Memory |
 | 🔍 | **Built-in lint** | `check_memory.sh` validates entry caps, daily log shape, header format, and scans for leaked secrets |
 | 🔒 | **Lightweight write lock** | `AI_MEMORY/.write.lock` prevents accidental overlapping memory writes without adding a database |
@@ -93,19 +117,142 @@ ShareMemory deliberately stays small: it's not a memory database, it's a **hando
 
 ## Install Options
 
-The fast path above installs one shared skill copy and symlinks Codex to it, so the two platforms never drift.
+The `skills` CLI installs to the current project by default. Do not pass `--global` for the recommended flow: ShareMemory is meant to be repo/project-scoped so the skill version, boot files, and `AI_MEMORY/` protocol are reviewed with that project.
+
+Global install can be useful for a private machine where you want a personal default available everywhere, but it is not the documented path because collaborators and the other agent environment may not have the same global copy.
+
+### Optional: personal global install
+
+Use this when you personally want to run `init memory` in many projects without installing the skill into each repo first. The skill is global; the memory it creates is still local to each project.
+
+```bash
+mkdir -p ~/.claude/skills ~/.agents/skills
+git clone https://github.com/ycl-2004/ShareMemory ~/.claude/skills/share-memory
+ln -sfn ~/.claude/skills/share-memory ~/.agents/skills/share-memory
+```
+
+Then open any project and say:
+
+> init memory
+
+ShareMemory will initialize that current project by creating `AI_MEMORY/`, `MEMORY_PROTOCOL.md`, `AGENTS.md`, `CLAUDE.md`, and `scripts/check_memory.sh` there. Update the global install with:
+
+```bash
+git -C ~/.claude/skills/share-memory pull --ff-only
+```
+
+### Recommended: Codex + Claude Code in one repo
+
+Install one canonical project copy for Codex, then point Claude Code at the same folder:
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent codex --copy --yes
+mkdir -p .claude/skills
+ln -s ../../.agents/skills/share-memory .claude/skills/share-memory
+```
+
+Run it from the repo that should carry the skill. This uses the live skills.sh skill route for [`share-memory`](https://skills.sh/ycl-2004/ShareMemory/share-memory). `--skill` makes the target explicit, `--agent codex` writes the repo-local Codex path `.agents/skills/share-memory`, `--copy` avoids a dangling source symlink, and `--yes` keeps the install non-interactive.
+
+The symlink exposes that same repo-local copy to Claude Code via `.claude/skills/share-memory`, so both agents read one installed skill inside the project.
+
+### Codex only
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent codex --copy --yes
+```
+
+This creates:
+
+```text
+.agents/skills/share-memory/SKILL.md
+```
+
+Codex also supports user-level skills under `$HOME/.agents/skills`, but ShareMemory is designed for project handoffs, so the repo-local path is the safer default.
+
+### Claude Code only
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent claude-code --copy --yes
+```
+
+This creates:
+
+```text
+.claude/skills/share-memory/SKILL.md
+```
+
+Claude Code also supports personal skills under `~/.claude/skills/`, but this README uses project skills so every collaborator in the repo gets the same protocol.
+
+### Manual install without Node.js
+
+Shared copy for Codex + Claude Code:
+
+```bash
+mkdir -p .agents/skills .claude/skills
+git clone https://github.com/ycl-2004/ShareMemory .agents/skills/share-memory
+ln -s ../../.agents/skills/share-memory .claude/skills/share-memory
+```
 
 Prefer fully separate copies?
 
 ```bash
 # Claude Code
-git clone https://github.com/ycl-2004/ShareMemory ~/.claude/skills/share-memory
+git clone https://github.com/ycl-2004/ShareMemory .claude/skills/share-memory
 
 # Codex
-git clone https://github.com/ycl-2004/ShareMemory ~/.agents/skills/share-memory
+git clone https://github.com/ycl-2004/ShareMemory .agents/skills/share-memory
 ```
 
-Remember to `git pull` both copies when updating. For a single Claude Code project only, clone into `<project>/.claude/skills/share-memory`.
+Remember to `git pull` both copies when updating. For a single Claude Code project only, clone into `.claude/skills/share-memory`.
+
+## Updating ShareMemory
+
+The update path depends on how the skill was installed.
+
+### If you installed with `npx skills add --copy`
+
+`--copy` creates a project-local copy of the skill, not a git checkout. To update it, rerun the same install command from the target repo. The Claude symlink can stay in place.
+
+Codex + Claude Code shared copy:
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent codex --copy --yes
+mkdir -p .claude/skills
+ln -sfn ../../.agents/skills/share-memory .claude/skills/share-memory
+```
+
+Codex only:
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent codex --copy --yes
+```
+
+Claude Code only:
+
+```bash
+npx skills add ycl-2004/ShareMemory --skill share-memory --agent claude-code --copy --yes
+```
+
+After updating, ask either agent:
+
+> memory status
+
+It should report the current protocol version and recent handoff state.
+
+### If you installed with `git clone`
+
+Pull the cloned skill directory. For the recommended shared install, only the canonical Codex copy needs a pull:
+
+```bash
+git -C .agents/skills/share-memory pull --ff-only
+```
+
+If you cloned separate Codex and Claude Code copies, update both:
+
+```bash
+git -C .agents/skills/share-memory pull --ff-only
+git -C .claude/skills/share-memory pull --ff-only
+```
 
 ## Daily Usage
 
@@ -117,9 +264,25 @@ Remember to `git pull` both copies when updating. For a single Claude Code proje
 | `consolidate memory` | Compress stale or duplicated memory while keeping startup cost stable. |
 | `repair memory` | Fix drift: missing `@AGENTS.md` import, duplicate/broken marker blocks, missing files. |
 
-These phrases trigger the skill implicitly on both platforms. In Codex you can also invoke it explicitly by typing `$share-memory` (or via `/skills`); Claude Code picks it up automatically from the skill description.
+These phrases trigger the skill implicitly on both platforms. In Codex you can also invoke it explicitly by typing `$share-memory` (or by finding `share-memory` via `/skills`, depending on the client). Claude Code picks it up automatically from the skill description. `AI_MEMORY/` is only the per-project data folder created by init; the skill id is `share-memory`.
 
 During init, the skill asks two questions: memory language (中文 / English / bilingual) and whether to enable the git recovery layer. Existing `CLAUDE.md` / `AGENTS.md` files are never overwritten — ShareMemory content lives in a bounded `<!-- SHAREMEMORY:START/END -->` marker block that init inserts or replaces (with a backup), so repeated runs stay clean. `CLAUDE.md` follows [Anthropic's recommended pattern](https://code.claude.com/docs/en/memory): one `@AGENTS.md` import plus Claude-specific notes, so the shared rules exist in exactly one place.
+
+## Write Cadence
+
+ShareMemory uses the existing files as a small routing system. Do not add new memory files for normal work.
+
+| When this changes | Update |
+|---|---|
+| Project goal, scope, architecture, workflow, install path, or public contract | `PROJECT.md` and/or `DECISIONS.md` immediately |
+| Skill behavior, memory protocol, rule/schema, boot template, lint gate, or install/publish contract | `DECISIONS.md`; refresh `PROJECT.md` if startup would be stale |
+| Accepted dependency, tooling, publishing, or integration decision | `DECISIONS.md` immediately |
+| Active task needs a next action, blocker, owner, continuation state, or completion state | `TASKS.md` automatically before handoff; routine cleanup via `update memory` |
+| Confirmed bug cause, validation trap, release gotcha, or repeated failure mode | `LEARNINGS.md` automatically if it would save a future agent time |
+| Milestone/release completed, task crossed sessions, or old facts were archived | Refresh `PROJECT.md` Long-Term Memory |
+| Only today's handoff changed | One compact `SYNC_LOG.md` bullet |
+
+If none of those apply, skip durable memory. The goal is not to remember more; it is to keep the next project agent from repeating work or missing current constraints.
 
 ## What `init` adds to your project
 
@@ -132,16 +295,69 @@ During init, the skill asks two questions: memory language (中文 / English / b
 | `AI_MEMORY/CONFIG.md` | Language, git choice, protocol version | on init |
 | `AI_MEMORY/PROJECT.md` | Overview, architecture, **Long-Term Memory** (distilled current state) | auto, on structural change |
 | `AI_MEMORY/DECISIONS.md` | Decisions and dependency changes (max 5) | **auto** |
-| `AI_MEMORY/TASKS.md` | Active and recently completed tasks | manual (`update memory`) |
-| `AI_MEMORY/LEARNINGS.md` | Lessons worth keeping (max 5) | manual |
+| `AI_MEMORY/TASKS.md` | Active and recently completed tasks | auto for handoff-critical state; manual cleanup |
+| `AI_MEMORY/LEARNINGS.md` | Lessons worth keeping (max 5) | auto for confirmed reusable lessons; manual curation |
 | `AI_MEMORY/SYNC_LOG.md` | Daily handoff blocks — how the agents see each other without noisy per-write logs | every write session |
 | `AI_MEMORY/archive/` | Overflowed entries and old logs | on overflow |
 
 Durable entries are signed `[YYYY-MM-DD HH:MM] [Claude|Codex]` with real system time. `SYNC_LOG.md` keeps at most one block per date, with compact bullets for that day's handoff. When a memory file exceeds its cap, the oldest content is distilled into Long-Term Memory or archived — the same progressive-summarization pattern used by agent-memory systems such as MemGPT/Letta.
 
+## Repo Source vs. Project State
+
+This repository contains the **skill package** (templates, protocol, scripts, assets). When you run `init memory` in a target project, only a subset is copied there:
+
+```
+ShareMemory repo (this repo)          Your project after init
+─────────────────────────────         ────────────────────────
+SKILL.md           ← skill itself     (not copied — stays installed)
+templates/project/ ← master copies    MEMORY_PROTOCOL.md
+                    copied on init →  AGENTS.md (marker block)
+                                      CLAUDE.md (marker block)
+                                      scripts/check_memory.sh
+templates/memory/  ← master copies    AI_MEMORY/CONFIG.md
+                    copied on init →  AI_MEMORY/PROJECT.md
+                                      AI_MEMORY/DECISIONS.md
+                                      AI_MEMORY/TASKS.md
+                                      AI_MEMORY/LEARNINGS.md
+                                      AI_MEMORY/SYNC_LOG.md
+                                      AI_MEMORY/archive/
+assets/            ← visuals          (not copied — repo-only)
+examples/          ← examples         (not copied — repo-only)
+.claude-plugin/    ← marketplace      (not copied — repo-only)
+```
+
+The `AI_MEMORY/`, `AGENTS.md`, `CLAUDE.md`, and `scripts/check_memory.sh` at the **root of this repository** are purely local test state from developing ShareMemory itself — they are NOT part of the published package. The real templates live under `templates/`.
+
+## Verification
+
+The public CI matrix is intentionally template-focused: it builds a throwaway project from `templates/`, runs the memory lint, then proves the lint catches the failure modes that matter most.
+
+| Check | What it proves |
+|---|---|
+| Full template project | Fresh `init` output is lint-clean |
+| Missing `AGENTS.md` / `CLAUDE.md` | Broken boot layers fail loudly |
+| Duplicate or unbalanced markers | Repeated/partial marker edits are detected |
+| Missing `@AGENTS.md` import | Claude cannot drift away from shared rules silently |
+| Secret-like memory content | Credentials are blocked from `AI_MEMORY/` |
+| Protocol mismatch | Older initialized projects are routed to `migrate memory` |
+| Demo replay | The public demo creates real files and passes `check_memory.sh` |
+
+Run the visible replay locally:
+
+```bash
+bash assets/demo.sh
+```
+
+Expected final line:
+
+```text
+Result: Codex starts with Claude handoff instead of a blank slate.
+```
+
 ## Conflict & Safety Rules
 
 - **User instructions always win** over memory, but the agent must point out the conflict and confirm before proceeding — then update memory. Neither side is ever silently overridden.
+- **Read-only instructions pause auto-write** — if you say "do not modify anything", "read-only audit", or "only write the report", agents must not write `AI_MEMORY/` even when normal auto-write rules would apply. They should say memory was not updated because of your restriction.
 - **Memory is not a diary** — write only facts that change what a future agent should do; raw reasoning, guesses, verbose logs, and obvious code details stay out.
 - **Secrets never enter memory** — API keys, credentials, tokens, and private URLs are forbidden and linted for.
 - **Do not run both agents simultaneously** on one project. A lightweight lock prevents accidental overlap, and the optional git layer recovers anything that still gets overwritten.
@@ -160,9 +376,9 @@ Durable entries are signed `[YYYY-MM-DD HH:MM] [Claude|Codex]` with real system 
 
 The skill never auto-installs software. During init it *asks* whether to enable git, records the choice in `CONFIG.md`, and only ever runs `git init` with explicit permission.
 
-## 中文快速开始
+## Chinese README
 
-本仓库本身就是一个 skill:克隆到 `~/.claude/skills/share-memory`(Claude Code),再用软链接 `ln -s ~/.claude/skills/share-memory ~/.agents/skills/share-memory` 接入 Codex(同一份代码,永不漂移)。之后在任何项目里说「init memory」,skill 会把协议、启动文件、校验脚本和空白记忆结构铺设进该项目;已有的 `CLAUDE.md` / `AGENTS.md` 不会被整文件覆盖,只会在 `<!-- SHAREMEMORY:START/END -->` marker block 内插入或替换 ShareMemory 内容,并先生成时间戳备份。架构决策和依赖变更自动写入;任务进度说「update memory」;「consolidate memory」做定期压缩。`SYNC_LOG.md` 每天最多一个交接块,agent 启动时读取最近 1-2 天来看到对方改了什么。设计细节见[《项目详解》](项目详解.md)。
+中文说明、安装路径和日常用法见 [README.zh.md](README.zh.md)。
 
 ## FAQ
 
@@ -204,6 +420,10 @@ History is never rewritten. Closed daily blocks are immutable; mistakes are fixe
 ## Contributing
 
 Issues and pull requests are welcome — especially additional agent boot files (Cursor, etc.), migration helpers, stronger lockfile handling, and CI integration for `check_memory.sh`.
+
+## Acknowledgements
+
+ShareMemory builds on the plain-file agent-instructions pattern popularized by [AGENTS.md](https://agents.md/), Claude Code's [`CLAUDE.md` memory/import model](https://code.claude.com/docs/en/memory), and Codex's [skills packaging model](https://developers.openai.com/codex/skills). The memory discipline is intentionally much smaller than platform memory systems such as [Letta](https://github.com/letta-ai/letta): this project is a repo-local handoff protocol, not a database.
 
 ## License
 

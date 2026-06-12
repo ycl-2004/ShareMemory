@@ -4,6 +4,7 @@ Daily handoff summary, newest date last. Max 7 daily blocks — older whole-day 
 Startup: read the latest 1-2 daily blocks to see what the other agent changed.
 
 There is at most one block per date. Today's block may be updated/condensed under the write lock; closed dates are immutable.
+This is a compact handoff, not a diary. Condense before a day exceeds 15 bullets.
 
 <!-- Format:
 ## YYYY-MM-DD
